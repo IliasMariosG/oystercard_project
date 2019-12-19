@@ -1,32 +1,34 @@
 
 class Oystercard
 
-attr_reader :balance, :limit, :travelling, :min_balance, :entry_station, :journey
+attr_reader :balance, :entry_station, :exit_station, :journey_history
 
-LIMIT = 90
-MIN_BALANCE = 1
+MAX_LIMIT = 90
+MIN_FARE = 1
 
 
-  def initialize(limit=LIMIT, min_balance = MIN_BALANCE)
+  def initialize 
     @balance = 0
-    @limit = limit
-    @min_balance = min_balance
     @entry_station = nil
-    @journey = []
+    @exit_station = nil
+    @journey_history = []
   end 
 
   def top_up(amount)
-    fail "ERROR - card already holds max funds (Max = #{@limit}" if (amount + @balance) > @limit
+    fail "ERROR - card already holds max funds (Max = #{MAX_LIMIT}" if (amount + @balance) > MAX_LIMIT
     @balance += amount
   end
 
-  def touch_in(entry_station)
-    fail "Insufficient Funds" if @balance < @min_balance
-    @entry_station = entry_station
+  def touch_in(station)
+    fail "Insufficient Funds" if @balance < MIN_FARE
+    @entry_station = station
+    @journey_history << @entry_station
   end 
 
-  def touch_out(exit_station)
-    deduct(@min_balance)
+  def touch_out(station)
+    @exit_station = station
+    @journey_history << @exit_station
+    deduct(MIN_FARE)
     @entry_station = nil
 
   end 
@@ -36,13 +38,13 @@ MIN_BALANCE = 1
     !!entry_station
   end 
 
-  def store_journey(start, finish)
-    journey_hash = {
-      "start" => start, 
-      "finish" => finish
-    }
-  #   @journey << journey_hash
-  end 
+  # def store_journey(start, finish)
+  #   journey_hash = {
+  #     "start" => start, 
+  #     "finish" => finish
+  #   }
+  # #   @journey << journey_hash
+  # end 
 
   private
 
