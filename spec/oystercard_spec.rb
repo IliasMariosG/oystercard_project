@@ -14,7 +14,7 @@ describe Oystercard do
   describe '#top up' do 
     it {is_expected.to respond_to(:top_up).with(1).argument }
    
-    it 'balance to update to 10 with top_up(10)' do 
+    it 'updates balance to min fare when topped-up with an amount of money' do 
       subject.top_up(Oystercard::MIN_FARE)
       expect(subject.balance).to eq Oystercard::MIN_FARE
     end 
@@ -26,14 +26,21 @@ describe Oystercard do
 
 let(:station) {double :station}
   describe '#touch_in' do 
-    it 'raises error if insuff funds on card' do 
+    it 'raises error if insufficient funds on card' do 
       expect{subject.touch_in(station)}.to raise_error "Insufficient Funds" 
     end 
     it 'stores entry_station' do 
       subject.top_up(Oystercard::MIN_FARE)
       subject.touch_in(station)
       expect(subject.entry_station).to eq station
-    end 
+    end
+
+    it 'stores entry station inside a hash' do
+      subject.top_up(Oystercard::MIN_FARE)
+      subject.touch_in(station)
+      expect(subject.journey[:entry_station]).to eq station
+    end
+
   end 
 
   describe '#touch_out' do 
@@ -56,6 +63,13 @@ let(:station) {double :station}
         subject.touch_in(station)
         subject.touch_out(station)
         expect(subject.exit_station).to eq station
+      end
+
+      it 'stores exit station inside a hash' do
+        subject.top_up(Oystercard::MIN_FARE)
+        subject.touch_in(station)
+        subject.touch_out(station)
+        expect(subject.journey[:exit_station]).to eq station
       end 
   end 
 
